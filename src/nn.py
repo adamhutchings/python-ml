@@ -27,6 +27,8 @@ class NeuralNetwork:
     # Next is the list of bias vectors, which is (layers - 1) vectors with
     # (inputs) elements each.
     params: List[int]
+
+    prevs: List[int]
     
     def __init__(self, layers, i, o):
         self.layers  = layers
@@ -34,6 +36,7 @@ class NeuralNetwork:
         self.outputs = o
         lsize = (i * i * (layers - 1)) + (i * o) + (layers - 1) * i
         self.params = [random.random() * 2 - 1 for i in range(lsize)]
+        self.prevs = [0 for i in range(lsize)]
     
     def _middle_matrix(self, start_index: int, last_layer: bool) -> np.array:
         if not last_layer:
@@ -83,10 +86,12 @@ class NeuralNetwork:
         err = self.obtain_data_loss(data)
         adjustments = []
         for i in range(len(self.params)):
-            adjustments.append(self.partial_diff(data, i) * learning_speed * math.sqrt(err))
+            adjustments.append((self.prevs[i] * 10 + self.partial_diff(data, i)) * learning_speed)
         for i in range(len(adjustments)):
             self.params[i] += adjustments[i]
+        self.prevs = adjustments
         new_err = self.obtain_data_loss(data)
         if new_err > err:
             for i in range(len(adjustments)):
                 self.params[i] -= adjustments[i] / 2
+                self.prevs[i] /= 2
