@@ -1,6 +1,8 @@
 import iread
 import nn
 
+import math
+
 # Iris time!
 iris_data = iread.read_data('iris/iris.data')
 data = nn.TrainingDataset()
@@ -15,12 +17,16 @@ net = nn.NeuralNetwork(1, 4, 1)
 print('#################################################\n' * 3)
 # Iterate until the loss isn't improving considerably
 lowest_loss = 1_000_000_000
-lowest_index = 0
-for i in range(20000):
-    loss = net.obtain_data_loss(data)
-    if i % 250 == 0:
-        print(f'Iteration #{i} finished. Current loss: {loss}')
-    net.learn(data, 0.00001)
+i = 0
+try:
+    while True:
+        if i % 250 == 0:
+            loss = net.obtain_data_loss(data)
+            print(f'Iteration #{i} finished. Current loss: {loss}')
+        i += 1
+        net.learn(data, 0.001)
+except KeyboardInterrupt:
+    pass
 
 print(f'Algorithm halting after {i} iterations.')
 
